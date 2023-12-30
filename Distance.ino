@@ -9,42 +9,122 @@
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire);
 
-const int red = 2; 
+const int red = 2;
 const int yellow = 3;
-const int blue = 4; 
+const int blue = 4;
 const int white = 5;
+
+const int echo = 8;
+const int trig = 7;
+
+const int topDistance = 100;
 
 void setup() {
 
+  //set LEDs
   pinMode(red,OUTPUT);
-  pinMode(yellow,OUTPUT);
   pinMode(blue,OUTPUT);
+  pinMode(yellow,OUTPUT);
   pinMode(white,OUTPUT);
+
+  //set Sensor
+  pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
 
   // initialize with the I2C addr 0x3C (for the 128x64)
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-
-  // Clear the buffer
   display.clearDisplay();
-
-  // Set text size and color
-  display.setTextSize(1);
+  display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
-
-  // Display "Hello, World!" at coordinates (0, 0)
-  display.setCursor(20,20 );
-  display.println(F("Hello, Yann!"));
-
-  // Display on the screen
   display.display();
 }
 
+int GetDistance(){
+  digitalWrite(trig,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig,LOW);
+
+  long duration = pulseIn(echo,HIGH);
+  float distance = (duration * 0.0343) / 2; //in centimeter
+
+  return distance;
+}
+
 void loop() {
-  display.setCursor(20,20 );
-  display.println(F("Hello, Yann!"));
+
+  float distance = GetDistance();
+
+  display.setCursor(0,20 );
+  display.println(F("Distance:"));
+  display.print(distance);
+  display.print(F("cm"));
   display.setCursor(50, 40);
   display.display();
-  delay(500);
+  delayMicroseconds(2);
   display.clearDisplay();
-  delay(500);
+ 
+
+  lightControl(distance);
+
+}
+
+void lightControl(float distance){
+    if(distance < topDistance/16){
+    digitalWrite(red,1);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+
+    delay(500);
+
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+
+    delay(500);
+  }else if(distance < topDistance/8){
+    digitalWrite(red,0);
+    digitalWrite(blue,1);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+
+    delay(500);
+
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+  }else if(distance < topDistance/4){
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,1);
+    digitalWrite(white,0);
+
+    delay(500);
+
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+  }else if(distance < topDistance/2){
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,1);
+
+    delay(500);
+
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+  }else{
+    digitalWrite(red,0);
+    digitalWrite(blue,0);
+    digitalWrite(yellow,0);
+    digitalWrite(white,0);
+  }
 }
